@@ -1,13 +1,13 @@
-import shopify as shopify
-import yaml
-from flask import Flask, request, url_for, redirect
+from flask import Flask, request, Response
 
 app = Flask(__name__)
 
-@app.route('/display', methods=['POST','GET'])
+@app.route('/orders_webhook', methods=['POST'])
 def display():
-    print(request.form['line'])
-    return redirect(url_for('index'))
+    request_data = request.get_json()
+    print(request_data)
+    status_code = Response(status=201)
+    return status_code
 
 app.run('0.0.0.0','8080')
 

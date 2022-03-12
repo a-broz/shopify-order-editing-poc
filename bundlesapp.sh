@@ -19,7 +19,7 @@ elif [ "$1" = "configure_bundle" ]; then
     echo "configuring bundle"
     $PWD/env/bin/python3.9 configure_bundle.py
     echo "complete!!"
-elif [ "$1" = "start_server" ]; then
+elif [ "$1" = "create_webhook" ]; then
     if [ -z "$2" ]; then
       echo "issue starting server - ngrok not supplied"
       exit
@@ -27,6 +27,9 @@ elif [ "$1" = "start_server" ]; then
       echo "server is starting..."
       $PWD/env/bin/python3.9 create_webhook.py $2
     fi
+elif [ "$1" = "start_server" ]; then
+    echo "starting_server"
+    $PWD/env/bin/python3.9 app.py
 else
     echo "-----unknown command------"
 fi

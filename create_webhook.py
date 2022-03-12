@@ -3,8 +3,7 @@ import yaml
 import requests
 import sys
 
-if len(sys.argv) == 0:
-    print("errore")
+if len(sys.argv) < 2:
     sys.exit("NGROK address not supplied")
 
 with open("config.yaml", "r") as stream:
@@ -15,17 +14,19 @@ with open("config.yaml", "r") as stream:
 
 conf_shop_url = conf['shop_url']
 conf_api_version = conf['api_version']
-conf_access_key = conf['access_key']
+conf_access_key = conf['secret']
 
 headers={
     "X-Shopify-Access-Token" : conf_access_key,
     "Content-Type": "application/json"
 }
    
-data = {
+endpoint = f'https://{sys.argv[1]}'
+
+body = {
   "webhook": {
     "topic": "orders/create",
-    "address": sys.argv[0],
+    "address": endpoint,
     "format": "json",
     "fields": [
       "id",
@@ -33,6 +34,10 @@ data = {
     ]
   }
 }
-print(f"Registering webhook to https://{conf_shop_url}/admin/api/2022-01/webhooks.json")
+print(f"Registering webhook from https://{conf_shop_url}/admin/api/2022-01/webhooks.json to {sys.argv[0]}")
+result = requests.post(url=f'https://{conf_shop_url}/admin/api/2022-01/webhooks.json',headers=headers, json=body)
 
-requests.request('POST',f'https://{conf_shop_url}/admin/api/2022-01/webhooks.json',headers=headers, data=data)
+print(result.reason)
+print(result.request.headers)
+print(result.request.body)
+print(result.request.url)
