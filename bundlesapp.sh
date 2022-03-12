@@ -24,7 +24,6 @@ elif [ "$1" = "create_webhook" ]; then
       echo "issue starting server - ngrok not supplied"
       exit
     else
-      echo "server is starting..."
       $PWD/env/bin/python3.9 create_webhook.py $2
     fi
 elif [ "$1" = "start_server" ]; then
