@@ -2,18 +2,18 @@
 api_key: XXX
 secret: XXX
 access_key: XXX
-shop_url: alex-brozzesi.myshopify.com
+shop_url: XXX.myshopify.com
 api_version: 2022-01
 
 bundle_products:
   sku: BUNDLETEST
-  id: 7164413313217 #ID of parent PRODUCT
+  id: 123232313217 #ID of parent PRODUCT
   children:
     -
       sku: TEST1234_A
-      id: 41384087158977 #ID of Child VARIANT
+      id: 12323232158977 #ID of Child VARIANT
       price: 25.00 
     -
       sku: TEST1234_B
-      id: 41384088207553 #ID of Child VARIANT
+      id: 4231233273553 #ID of Child VARIANT
       price: 25.00 

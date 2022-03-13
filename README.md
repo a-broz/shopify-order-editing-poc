@@ -1,7 +1,10 @@
 # shopify-order-editing-poc
 POC flask based middleware to break out bundle components post order placement via the Shopify order editing API. The webserver uses multi-threading for asynchronicity. 
 
-Before installing, make sure that you have `pip3` and `python3` PATH vars setup, and have the ngrok executable handy
+Before installing, make sure that:
+- You have `pip3` and `python3` PATH setup
+- Have the ngrok executable handy (https://ngrok.com/download)
+- Have installed a private/custom Shopify app and have the keys ready to go!
 
 <h2>Installation steps:</h2>
 
