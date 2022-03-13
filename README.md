@@ -11,7 +11,7 @@ Before installing, make sure that:
 1. clone the project 
 2. run `./bundlesapp.sh setup`
 3. configure the `example_config.yaml` file with the bundle and API setup  and rename to `config.yaml`
-4. run `./bundlesapp.sh configure_bundle`
+4. run `./bundlesapp.sh configure_bundle` . NOTE: If you make a mistake here with the bundle configuration, run `./bundlesapp.sh delete_bundle` to delete the metafields so you can start again.
 5. start ngrok server pointing to 8080 via `ngrok http 8080` and retrieve the ngrok endpoint url, e.g. <i>'bfd4-151-231-84-15.ngrok.io'</i>
 6. run `./bundlesapp.sh create_webhook <ngrok>` using the ngrok endpoint created in previous step
 7. run `./bundlesapp.sh start_server` to begin listening for incoming orders.
