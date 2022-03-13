@@ -28,7 +28,14 @@ elif [ "$1" = "create_webhook" ]; then
     fi
 elif [ "$1" = "start_server" ]; then
     echo "starting_server"
-    $PWD/env/bin/python3.9 app.py
+    $PWD/env/bin/python3.9 webserver.py
+elif [ "$1" = "help" ]; then
+    echo "-------COMMAND MENU-------"
+    echo "'setup' - install virtual python environment"
+    echo "'configure_bundle' - configure bundle metafield to parent product based on config.py"
+    echo "'delete_bundle' - delete metafields from the parent product."
+    echo "'create_webhook <endpoint>' - create orders webhook to point at given endpoint."
+    echo "'start_server' - starts the server to listen for webhooks."
 else
     echo "-----unknown command------"
 fi

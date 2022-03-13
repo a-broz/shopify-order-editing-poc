@@ -11,7 +11,7 @@ product = shopify.Product.find(id_=bundles['id'])
 #setup bundle json for children
 bundle_components = {"children":[]}
 for i in bundles["children"]:
-    bundle_components["children"].append({"sku":i["sku"] , "price":i["price"]})
+    bundle_components["children"].append({"id":i["id"] , "price":i["price"]})
 
 bundle_components = {
         'namespace': 'uma_bundles',
@@ -23,4 +23,3 @@ bundle_components = {
 product.add_metafield(shopify.Metafield(bundle_components))
 
 print(product.metafields()[0].attributes["id"] , product.metafields()[0].attributes["value"])
-

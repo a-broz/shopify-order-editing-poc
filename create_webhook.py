@@ -2,6 +2,7 @@ from flask import request
 import yaml
 import requests
 import sys
+import json
 
 if len(sys.argv) < 2:
     sys.exit("NGROK address not supplied")
@@ -20,24 +21,31 @@ headers={
     "X-Shopify-Access-Token" : conf_access_key,
     "Content-Type": "application/json"
 }
-   
-endpoint = f'https://{sys.argv[1]}'
 
+print("looking for existing orders webhooks...")
+result = requests.get(url=f'https://{conf_shop_url}/admin/api/2022-01/webhooks.json',headers=headers)
+resp = json.loads(result._content)
+for i in resp["webhooks"]:
+    print(f"webhook with ID {i['id']} found, type 'y' to confirm delete")
+    x = input()
+    if x.lower() == "y":
+        print(f"Deleting webhook {i['id']}")
+        result = requests.delete(url=f'https://{conf_shop_url}/admin/api/2022-01/webhooks/{i["id"]}.json',headers=headers)
+    else:
+        print("skipping deletion")
+
+endpoint = f'https://{sys.argv[1]}/orders_webhook'
 body = {
   "webhook": {
     "topic": "orders/create",
     "address": endpoint,
     "format": "json",
-    "fields": [
-      "id",
-      "note"
-    ]
+    "private_metafield_namespaces": ['uma_bundles']
   }
 }
-print(f"Registering webhook from https://{conf_shop_url}/admin/api/2022-01/webhooks.json to {sys.argv[0]}")
+print(f"Registering new webhook from https://{conf_shop_url}/admin/api/2022-01/webhooks.json to {sys.argv[0]}")
 result = requests.post(url=f'https://{conf_shop_url}/admin/api/2022-01/webhooks.json',headers=headers, json=body)
-
-print(result.reason)
-print(result.request.headers)
-print(result.request.body)
-print(result.request.url)
+if result.status_code == 201:
+    print("webhook creation successful!")
+else:
+    print(f"error creating webhook. {result.status_code}:{result.reason}")

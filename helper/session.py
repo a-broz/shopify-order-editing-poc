@@ -16,4 +16,3 @@ def start_session():
     session = shopify.Session(conf_shop_url, conf_api_version, conf_secret)
     shopify.ShopifyResource.activate_session(session)
     return(session , conf)
-    
