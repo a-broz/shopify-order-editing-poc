@@ -34,6 +34,7 @@ for i in resp["webhooks"]:
     else:
         print("skipping deletion")
 
+#Register webhook for orders/create
 endpoint = f'https://{sys.argv[1]}/orders_webhook'
 body = {
   "webhook": {
@@ -43,7 +44,26 @@ body = {
     "private_metafield_namespaces": ['uma_bundles']
   }
 }
-print(f"Registering new webhook from https://{conf_shop_url}/admin/api/2022-01/webhooks.json to {sys.argv[0]}")
+print(f"Registering new orders/create webhook from https://{conf_shop_url}/admin/api/2022-01/webhooks.json to https://{sys.argv[1]}/orders_webhook")
+
+result = requests.post(url=f'https://{conf_shop_url}/admin/api/2022-01/webhooks.json',headers=headers, json=body)
+if result.status_code == 201:
+    print("webhook creation successful!")
+else:
+    print(f"error creating webhook. {result.status_code}:{result.reason}")
+
+#Register webhook for orders/edit (Purely to simulate what DOMS would see)
+endpoint = f'https://{sys.argv[1]}/orders_edited_webhook'
+body = {
+  "webhook": {
+    "topic": "orders/edited",
+    "address": endpoint,
+    "format": "json",
+    "private_metafield_namespaces": ['uma_bundles']
+  }
+}
+print(f"Registering new orders/edited webhook from https://{conf_shop_url}/admin/api/2022-01/webhooks.json to https://{sys.argv[1]}/orders_edited_webhook")
+
 result = requests.post(url=f'https://{conf_shop_url}/admin/api/2022-01/webhooks.json',headers=headers, json=body)
 if result.status_code == 201:
     print("webhook creation successful!")

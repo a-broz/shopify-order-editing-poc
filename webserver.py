@@ -117,6 +117,8 @@ def process_order(order):
     )
     print(f'~~~~~Committed order Edit! Completed.~~~~~~')
 
+def process_order_edit(order):
+    print(order)
 
 @app.route('/orders_webhook', methods=['POST'])
 def process_webhook():
@@ -134,5 +136,22 @@ def process_webhook():
     print("Incoming order detected, server returning 201 status code")
     return status_code
 
-app.run('0.0.0.0','8080')
 
+@app.route('/orders_edited_webhook', methods=['POST'])
+def process_edit_webhook():
+    #First verify that webhook came from Shopify by processing the HMAC
+    conf=read_config("config.yaml")
+    verified = verify_webhook(request.get_data(),request.headers.get('X-Shopify-Hmac-SHA256'),conf["access_key"])
+    if not verified:
+        print("bad request detected")
+        abort(401)
+    
+    #If verified, we proceed asynchronously.
+    thread = Thread(target=process_order_edit, kwargs={'order': request.get_json()})
+    thread.start()
+    status_code = Response(status=201) 
+    print("Order edit detected, server returning 201 status code")
+    return status_code
+
+
+app.run('0.0.0.0','8080')
