@@ -1,3 +1,4 @@
+from audioop import add
 from flask import Flask, request, Response, abort
 from threading import Thread
 from helper.session import start_session , verify_webhook , read_config
@@ -44,13 +45,13 @@ def process_order(order):
     calculated_order_result = json.loads(calculated_order_result)
     calculated_order_id = calculated_order_result['data']['orderEditBegin']['calculatedOrder']['id']
     print(f"Opened order edit with ID {calculated_order_id}")
+    total_cost = calculated_order_result["extensions"]["cost"]["actualQueryCost"]
 
-    #add children variants to calculated order
+    #add children variants to calculated order to GQL
+    req = 'mutation batchUpdates ($id: ID!) {'
     for child in bundles['children']:
-        add_child_result = shopify.GraphQL().execute(
-            f'''
-            mutation addVariantToOrder{{
-            orderEditAddVariant(id: "{calculated_order_id}", variantId: "gid://shopify/ProductVariant/{child['id']}", quantity: 1){{
+        req += f'''
+            edit{child['id']}: orderEditAddVariant(id: $id, variantId: "gid://shopify/ProductVariant/{child['id']}", quantity: 1){{
                 calculatedOrder {{
                     id
                     addedLineItems(first:5) {{
@@ -67,58 +68,57 @@ def process_order(order):
                     message
                 }}
             }}
-            }}
-            '''
-        )
-        print(f"Added Child product {child['id']} to open order edit")
-
+        '''
+    
+    print(f"Added Child products to open order edit GQL")
     bundle_parent_item_id = bundle_parent_item_id.replace("LineItem","CalculatedLineItem")
-    remove_parent_results = shopify.GraphQL().execute(
-        f'''
-        mutation changeLineItemQuantity {{
-            orderEditSetQuantity(id: "{calculated_order_id}", lineItemId: "{bundle_parent_item_id}", quantity: 0 )
-            {{
-                calculatedOrder {{
-                id
-                addedLineItems(first: 5) {{
-                    edges {{
-                        node {{
-                            id
-                            quantity
-                        }}
+
+    #remove parent from calculated order to GQL
+    req += f'''
+        orderEditSetQuantity(id: $id, lineItemId: "{bundle_parent_item_id}", quantity: 0 )
+        {{
+            calculatedOrder {{
+            id
+            addedLineItems(first: 5) {{
+                edges {{
+                    node {{
+                        id
+                        quantity
                     }}
                 }}
-                }}
-                userErrors {{
-                field
-                message
-                }}
+            }}
+            }}
+            userErrors {{
+            field
+            message
             }}
         }}
-        '''
-    )
-    print(f"Removed parent product from order Edit: {bundle_parent_item_id}")
+    '''
+    print(f"Added parent product removal from order Edit: {bundle_parent_item_id} in GQL")
 
     #commit order edits
-    commit_result = shopify.GraphQL().execute(
-        f'''
-        mutation commitEdit {{
-            orderEditCommit(id: "{calculated_order_id}", notifyCustomer: false, staffNote: "Order edited by Bundles API") {{
-                order {{
-                id
-                }}
-                userErrors {{
-                field
-                message
-                }}
+    req +=f'''
+        orderEditCommit(id: $id, notifyCustomer: false, staffNote: "Order edited by Bundles API") {{
+            order {{
+            id
+            }}
+            userErrors {{
+            field
+            message
             }}
         }}
         '''
-    )
+    
+    variables = {'id': calculated_order_id}
+    req += '\n}'
+    resp = shopify.GraphQL().execute(req,variables=variables)
+    total_cost += json.loads(resp)["extensions"]["cost"]["actualQueryCost"]
+
     print(f'~~~~~Committed order Edit! Completed.~~~~~~')
+    print(f'Total Cost: {total_cost}')
 
 def process_order_edit(order):
-    print(order)
+    print(f'Order Edit Webhook: {order}')
 
 @app.route('/orders_webhook', methods=['POST'])
 def process_webhook():
